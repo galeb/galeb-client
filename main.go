@@ -23,6 +23,16 @@ type Pool struct {
 	Status string `json:"_status"`
 }
 
+func render(body []byte, data jsonData) []Pool {
+	err := json.Unmarshal(body, &data)
+	if err != nil {
+		fmt.Println("Error while parsing file")
+		return nil
+	}
+
+	return data.PoolData
+}
+
 func main() {
 	host := os.Getenv("GALEB_HOST")
 	token := os.Getenv("GALEB_TOKEN")
@@ -54,13 +64,7 @@ func main() {
 
 	body, _ := ioutil.ReadAll(resp.Body)
 
-	err = json.Unmarshal(body, &data)
-	if err != nil {
-		fmt.Println("Error while parsing file")
-		return
-	}
-
-	for _, pool := range data.PoolData {
+	for _, pool := range render(body, data) {
 		fmt.Printf("Id = %v, Name = %v, Status = %v\n", pool.Id, pool.Name, pool.Status)
 	}
 }
