@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"errors"
 )
 
 type jsonData struct {
@@ -23,14 +24,13 @@ type Pool struct {
 	Status string `json:"_status"`
 }
 
-func render(body []byte, data jsonData) []Pool {
+func render(body []byte, data jsonData) ([]Pool, error) {
 	err := json.Unmarshal(body, &data)
 	if err != nil {
-		fmt.Println("Error while parsing file")
-		return nil
+		return nil, errors.New("Error while parsing body!")
 	}
 
-	return data.PoolData
+	return data.PoolData, nil
 }
 
 func main() {
@@ -64,7 +64,8 @@ func main() {
 
 	body, _ := ioutil.ReadAll(resp.Body)
 
-	for _, pool := range render(body, data) {
+	pools,_ := render(body, data)
+	for _, pool := range pools {
 		fmt.Printf("Id = %v, Name = %v, Status = %v\n", pool.Id, pool.Name, pool.Status)
 	}
 }
