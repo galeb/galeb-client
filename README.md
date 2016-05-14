@@ -1,6 +1,8 @@
-## Galeb Client (CLI)
+## Galeb Client
 
-A easy wrapper CLI to use the Galeb Manager.
+[![CircleCI](https://circleci.com/gh/galeb/galeb-client/tree/master.svg?style=svg)](https://circleci.com/gh/galeb/galeb-client/tree/master)
+
+A easy wrapper CLI to use the [Galeb Manager](https://github.com/galeb/galeb-manager)
 
 ### Build
 
