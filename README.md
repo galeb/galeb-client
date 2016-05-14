@@ -10,6 +10,12 @@ A easy wrapper CLI to use the [Galeb Manager](https://github.com/galeb/galeb-man
 go build -o galeb
 ```
 
+### Test
+
+```bash
+go test
+```
+
 ### LICENSE
 
 ```Copyright
