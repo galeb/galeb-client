@@ -3,11 +3,11 @@ package main
 import (
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
-	"errors"
 )
 
 type jsonData struct {
@@ -27,7 +27,7 @@ type Pool struct {
 func render(body []byte, data jsonData) ([]Pool, error) {
 	err := json.Unmarshal(body, &data)
 	if err != nil {
-		return nil, errors.New("Error while parsing body!")
+		return nil, errors.New("error while parsing body")
 	}
 
 	return data.PoolData, nil
@@ -64,7 +64,7 @@ func main() {
 
 	body, _ := ioutil.ReadAll(resp.Body)
 
-	pools,_ := render(body, data)
+	pools, _ := render(body, data)
 	for _, pool := range pools {
 		fmt.Printf("Id = %v, Name = %v, Status = %v\n", pool.Id, pool.Name, pool.Status)
 	}

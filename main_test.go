@@ -13,22 +13,22 @@ type S struct{}
 var _ = Suite(&S{})
 
 func (s *S) TestRenderWithReturn(c *C) {
-	fakeBody := []byte(`{"_embedded":{"pool":[{"id":123,"name":"pool-test-1","_status":"OK"}]}}`)
-	fakeData := jsonData{Embedded{make([]Pool, 0)}}
-	pools,_ := render(fakeBody, fakeData)
-	c.Assert(len(pools), Equals, 1)
+	b := []byte(`{"_embedded":{"pool":[{"id":123,"name":"pool-test-1","_status":"OK"}]}}`)
+	d := jsonData{Embedded{make([]Pool, 0)}}
+	p, _ := render(b, d)
+	c.Assert(len(p), Equals, 1)
 }
 
 func (s *S) TestRenderWithEmptyReturn(c *C) {
-	fakeBody := []byte(`{"_embedded":{"pool":[]}}`)
-	fakeData := jsonData{Embedded{make([]Pool, 0)}}
-	pools,_ := render(fakeBody, fakeData)
-	c.Assert(len(pools), Equals, 0)
+	b := []byte(`{"_embedded":{"pool":[]}}`)
+	d := jsonData{Embedded{make([]Pool, 0)}}
+	p, _ := render(b, d)
+	c.Assert(len(p), Equals, 0)
 }
 
 func (s *S) TestRenderWithParseError(c *C) {
-	fakeBody := []byte(`{"_embedded":{pool:[]}}`)
-	fakeData := jsonData{Embedded{make([]Pool, 0)}}
-	_,err := render(fakeBody, fakeData)
-	c.Assert(err, ErrorMatches, "Error while parsing body!")
+	b := []byte(`{"_embedded":{pool:[]}}`)
+	d := jsonData{Embedded{make([]Pool, 0)}}
+	_, err := render(b, d)
+	c.Assert(err, ErrorMatches, "error while parsing body")
 }
