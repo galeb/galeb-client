@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"log"
 )
 
 type jsonData struct {
@@ -33,6 +34,31 @@ func render(body []byte, data jsonData) ([]Pool, error) {
 	return data.PoolData, nil
 }
 
+func getPool(url string, token string) ([]Pool, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	req.Header.Set("x-auth-token", token)
+	req.Header.Set("Content-Type", "application/json")
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+
+	pool := make([]Pool, 0)
+	data := jsonData{Embedded{pool}}
+
+	pools, err := render(body, data)
+
+	return pools, err
+}
+
 func main() {
 	host := os.Getenv("GALEB_HOST")
 	token := os.Getenv("GALEB_TOKEN")
@@ -45,26 +71,8 @@ func main() {
 		return
 	}
 	url := host + os.Args[1]
-	pool := make([]Pool, 0)
-	data := jsonData{Embedded{pool}}
 
-	req, err := http.NewRequest("GET", url, nil)
-	req.Header.Set("x-auth-token", token)
-	req.Header.Set("Content-Type", "application/json")
-
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: tr}
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-
-	body, _ := ioutil.ReadAll(resp.Body)
-
-	pools, _ := render(body, data)
+	pools, _ := getPool(url, token)
 	for _, pool := range pools {
 		fmt.Printf("Id = %v, Name = %v, Status = %v\n", pool.Id, pool.Name, pool.Status)
 	}
