@@ -5,4 +5,7 @@ general:
 
 machine:
   go:
-    version: 1.6
+    version:
+        - tip
+        - 1.5
+        - 1.4
