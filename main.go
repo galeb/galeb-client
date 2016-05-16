@@ -2,39 +2,31 @@ package main
 
 import (
 	"crypto/tls"
-	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/Jeffail/gabs"
+	"github.com/olekukonko/tablewriter"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
-	"log"
+	"strconv"
 )
 
-type jsonData struct {
-	Embedded `json:"_embedded"`
-}
-
-type Embedded struct {
-	PoolData []Pool `json:"pool"`
-}
-
-type Pool struct {
-	Id     int    `json:"id"`
-	Name   string `json:"name"`
-	Status string `json:"_status"`
-}
-
-func render(body []byte, data jsonData) ([]Pool, error) {
-	err := json.Unmarshal(body, &data)
+func parseJson(body []byte, path string) ([]*gabs.Container, error) {
+	jsonParsed, err := gabs.ParseJSON(body)
 	if err != nil {
 		return nil, errors.New("error while parsing body")
 	}
+	entities, err := jsonParsed.S("_embedded", path).Children()
+	if err != nil {
+		return nil, errors.New("error while getting entity")
+	}
 
-	return data.PoolData, nil
+	return entities, nil
 }
 
-func getPool(url string, token string) ([]Pool, error) {
+func getEntity(url string, token string, path string) ([]*gabs.Container, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	req.Header.Set("x-auth-token", token)
 	req.Header.Set("Content-Type", "application/json")
@@ -51,12 +43,9 @@ func getPool(url string, token string) ([]Pool, error) {
 	body, err := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
 
-	pool := make([]Pool, 0)
-	data := jsonData{Embedded{pool}}
+	entities, err := parseJson(body, path)
 
-	pools, err := render(body, data)
-
-	return pools, err
+	return entities, err
 }
 
 func main() {
@@ -70,10 +59,18 @@ func main() {
 		fmt.Println("GALEB_TOKEN undefined.")
 		return
 	}
-	url := host + os.Args[1]
+	ePath := os.Args[1]
+	url := host + ePath
 
-	pools, _ := getPool(url, token)
-	for _, pool := range pools {
-		fmt.Printf("Id = %v, Name = %v, Status = %v\n", pool.Id, pool.Name, pool.Status)
+	entities, _ := getEntity(url, token, ePath)
+
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"ID", "Name", "Status"})
+	table.SetAlignment(tablewriter.ALIGN_CENTRE)
+
+	for _, entity := range entities {
+		newData := entity.Data().(map[string]interface{})
+		table.Append([]string{strconv.FormatFloat(newData["id"].(float64), 'f', 0, 64), newData["name"].(string), newData["_status"].(string)})
 	}
+	table.Render()
 }

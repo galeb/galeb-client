@@ -1,11 +1,12 @@
 package main
 
 import (
-	"net/http"
-	"net/http/httptest"
 	"testing"
 
+	"github.com/Jeffail/gabs"
 	. "gopkg.in/check.v1"
+	"net/http"
+	"net/http/httptest"
 )
 
 func Test(t *testing.T) { TestingT(t) }
@@ -16,35 +17,40 @@ var _ = Suite(&S{})
 
 func (s *S) TestRenderWithReturn(c *C) {
 	b := []byte(`{"_embedded":{"pool":[{"id":123,"name":"pool-test-1","_status":"OK"}]}}`)
-	d := jsonData{Embedded{make([]Pool, 0)}}
-	p, _ := render(b, d)
-	c.Assert(len(p), Equals, 1)
+	p, _ := parseJson(b, "pool")
+	c.Assert(p, HasLen, 1)
 }
 
 func (s *S) TestRenderWithEmptyReturn(c *C) {
 	b := []byte(`{"_embedded":{"pool":[]}}`)
-	d := jsonData{Embedded{make([]Pool, 0)}}
-	p, _ := render(b, d)
-	c.Assert(len(p), Equals, 0)
+	p, _ := parseJson(b, "pool")
+	c.Assert(p, HasLen, 0)
 }
 
 func (s *S) TestRenderWithParseError(c *C) {
 	b := []byte(`{"_embedded":{pool:[]}}`)
-	d := jsonData{Embedded{make([]Pool, 0)}}
-	_, err := render(b, d)
+	_, err := parseJson(b, "pool")
 	c.Assert(err, ErrorMatches, "error while parsing body")
+}
+
+func (s *S) TestRenderWithGettingError(c *C) {
+	b := []byte(`{"_embedded":{"pool":[{"id":123,"name":"pool-test-1","_status":"OK"}]}}`)
+	_, err := parseJson(b, "test")
+	c.Assert(err, ErrorMatches, "error while getting entity")
 }
 
 func (s *S) TestGetPool(c *C) {
 	result := []byte(`{"_embedded":{"pool":[{"id":123,"name":"pool-test-1","_status":"OK"}]}}`)
-	expected := Pool{Id:123, Name:"pool-test-1", Status:"OK"}
+	jsonObj, _ := gabs.ParseJSON(result)
+	expected, _ := jsonObj.S("_embedded", "pool").Children()
+
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Write(result)
 	}))
 	defer ts.Close()
 
-	body, _ := getPool(ts.URL, "123456789")
+	body, _ := getEntity(ts.URL, "123456789", "pool")
 
-	c.Assert(len(body), Equals, 1)
-	c.Assert(body[0], Equals, expected)
+	c.Assert(body, HasLen, 1)
+	c.Assert(body, DeepEquals, expected)
 }
