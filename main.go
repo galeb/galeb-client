@@ -52,7 +52,7 @@ func getEntity(url string, token string, path string) ([]*gabs.Container, error)
 func renderTable(entities []*gabs.Container) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"ID", "Name", "Status"})
-	table.SetAlignment(tablewriter.ALIGN_CENTRE)
+	table.SetAlignment(tablewriter.ALIGN_CENTER)
 
 	for _, entity := range entities {
 		newData := entity.Data().(map[string]interface{})
