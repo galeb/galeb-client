@@ -75,6 +75,9 @@ func main() {
 	ePath := os.Args[1]
 	url := host + ePath
 
+	entities, err := getEntity(url, token, ePath)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	renderTable(entities)
