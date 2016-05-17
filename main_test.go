@@ -3,10 +3,13 @@ package main
 import (
 	"testing"
 
+	"bytes"
 	"github.com/Jeffail/gabs"
 	. "gopkg.in/check.v1"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 )
 
 func Test(t *testing.T) { TestingT(t) }
@@ -53,4 +56,34 @@ func (s *S) TestGetPool(c *C) {
 
 	c.Assert(body, HasLen, 1)
 	c.Assert(body, DeepEquals, expected)
+}
+
+func (s *S) TestTablePool(c *C) {
+	b := []byte(`{"_embedded":{"pool":[{"id":123,"name":"pool-test-1","_status":"OK"}]}}`)
+	p, _ := parseJson(b, "pool")
+
+	o := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	renderTable(p)
+
+	out := make(chan string)
+	go func() {
+		var buf bytes.Buffer
+		io.Copy(&buf, r)
+		out <- buf.String()
+	}()
+
+	w.Close()
+	os.Stdout = o
+
+	got := <-out
+	expected := `+-----+-------------+--------+
+| ID  |    NAME     | STATUS |
++-----+-------------+--------+
+| 123 | pool-test-1 |   OK   |
++-----+-------------+--------+
+`
+	c.Assert(got, Equals, expected)
 }
