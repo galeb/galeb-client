@@ -66,7 +66,7 @@ func main() {
 
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"ID", "Name", "Status"})
-	table.SetAlignment(tablewriter.ALIGN_CENTRE)
+	table.SetAlignment(tablewriter.ALIGN_CENTER)
 
 	for _, entity := range entities {
 		newData := entity.Data().(map[string]interface{})
