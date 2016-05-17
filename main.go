@@ -78,7 +78,7 @@ func main() {
 	entities, err := getEntity(url, token, ePath)
 	if err != nil {
 		log.Fatal(err)
-	}
+    }
 
 	renderTable(entities)
 }
