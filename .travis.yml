@@ -1,10 +1,14 @@
 language: go
+sudo: false
 os:
 - linux
 - osx
 go:
 - 1.5
 - tip
+before_install:
+  - go get github.com/mattn/goveralls
+  - go get golang.org/x/tools/cmd/cover
 script:
   - go test -v -covermode=count -coverprofile=coverage.out
   - $HOME/gopath/bin/goveralls -service=travis-ci -repotoken $COVERALLS_TOKEN
@@ -12,4 +16,6 @@ notifications:
   slack:
     rooms:
       secure: AZ6zuqvfEIHfGMjZ7LgUKfCoIU29woLeP8nKmBWaCGUxw2/8E50BvlKTTqrlKqnxlIAisDxN2+z7JuSYXgVlZzLFp2+jRMNqxnTHBvWabCNzHWTN20urU7oVvFel5+LPIBsjPmWav7Gs7aCGMqwa3yse9aH943C9oL/f53xZDq9VuUHPf8LmblkNBwQ0u14csqRGDuT649ae6m2vW11pTOpPEJUSGMHtmc9GToL71bDgWPIfKc3MRvM5kccJ2ebHjFzDygLcSYr06LtPGkDzpA9igH6NYXR6A9G6adzfWVschDGjliiSyiCYyt9sBNY0OD9Boxbr/hOwvE11Ww9FGwprntZeApLFYZOFnXjlVdmG8tlKAXtUszCG1MPJy/OKUJEjp05LVQdCIclIx+woL58sjvHM6g2rOWnIJoXmJsInkdEI4oh/XvpzEYw7y9eIGJBaM9RyaRgiNfkClH6BuqipeVmRxvSFa0U/RapUj1IE4TTCLZVY7odajpiSWQaPTtAGwpL7ii0H1LEMF0p4L4SBGc2b3pfdBCAxOYHAs9xnAqZfTp+fpHD1LenZFAWbYZs1y59IFJ4WE8LEAdly7QicPNZjFLo5W5BpE7+20TxhJY5DoJgVjoezrYqMOKZUL8su/VUAfpQzSTtzRT6dpglCmczrtz/koEsUY3xgbq0=
+    on_success: always
+    on_failure: always
     on_start: always
