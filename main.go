@@ -4,13 +4,14 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	"github.com/Jeffail/gabs"
-	"github.com/olekukonko/tablewriter"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
+
+	"github.com/Jeffail/gabs"
+	"github.com/olekukonko/tablewriter"
 )
 
 func parseJson(body []byte, path string) ([]*gabs.Container, error) {
