@@ -1,8 +1,0 @@
-general:
-  branches:
-    only:
-      - master
-
-machine:
-  go:
-    version: 1.6

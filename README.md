@@ -1,6 +1,5 @@
 ## Galeb Client
 
-[![CircleCI](https://circleci.com/gh/galeb/galeb-client/tree/master.svg?style=svg)](https://circleci.com/gh/galeb/galeb-client/tree/master)
 [![Build Status](https://travis-ci.org/galeb/galeb-client.svg?branch=master)](https://travis-ci.org/galeb/galeb-client)
 
 A easy wrapper CLI to use the [Galeb Manager](https://github.com/galeb/galeb-manager)
