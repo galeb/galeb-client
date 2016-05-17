@@ -49,6 +49,18 @@ func getEntity(url string, token string, path string) ([]*gabs.Container, error)
 	return entities, err
 }
 
+func renderTable(entities []*gabs.Container) {
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"ID", "Name", "Status"})
+	table.SetAlignment(tablewriter.ALIGN_CENTRE)
+
+	for _, entity := range entities {
+		newData := entity.Data().(map[string]interface{})
+		table.Append([]string{strconv.FormatFloat(newData["id"].(float64), 'f', 0, 64), newData["name"].(string), newData["_status"].(string)})
+	}
+	table.Render()
+}
+
 func main() {
 	host := os.Getenv("GALEB_HOST")
 	token := os.Getenv("GALEB_TOKEN")
@@ -63,15 +75,7 @@ func main() {
 	ePath := os.Args[1]
 	url := host + ePath
 
-	entities, _ := getEntity(url, token, ePath)
-
-	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"ID", "Name", "Status"})
-	table.SetAlignment(tablewriter.ALIGN_CENTRE)
-
-	for _, entity := range entities {
-		newData := entity.Data().(map[string]interface{})
-		table.Append([]string{strconv.FormatFloat(newData["id"].(float64), 'f', 0, 64), newData["name"].(string), newData["_status"].(string)})
 	}
-	table.Render()
+
+	renderTable(entities)
 }
