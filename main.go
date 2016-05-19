@@ -14,6 +14,12 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
+//type Context struct {
+//	Args   []string
+//	Stdout io.Writer
+//	Stderr io.Writer
+//	Stdin  io.Reader
+//}
 
 type Entities struct {
 	Id     int
@@ -95,6 +101,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	//var stdout, stderr bytes.Buffer
+	//context := Context{
+	//	Stdout: &stdout,
+	//	Stderr: &stderr,
+	//}
+	//renderTable(&context, entities)
 
 	renderTable(entities)
 }
