@@ -78,7 +78,6 @@ func renderTable(entities []Entities) {
 
 	for _, entity := range entities {
 		table.Append([]string{strconv.Itoa(entity.Id), entity.Name, entity.Status})
-
 	}
 	table.Render()
 }
