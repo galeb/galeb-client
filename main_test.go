@@ -3,10 +3,9 @@ package main
 import (
 	"testing"
 
-	"bytes"
-	"github.com/Jeffail/gabs"
+	//"github.com/Jeffail/gabs"
 	. "gopkg.in/check.v1"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -43,12 +42,11 @@ func (s *S) TestRenderWithGettingError(c *C) {
 }
 
 func (s *S) TestGetPool(c *C) {
-	result := []byte(`{"_embedded":{"pool":[{"id":123,"name":"pool-test-1","_status":"OK"}]}}`)
-	jsonObj, _ := gabs.ParseJSON(result)
-	expected, _ := jsonObj.S("_embedded", "pool").Children()
+	b := []byte(`{"_embedded":{"pool":[{"id":123,"name":"pool-test-1","_status":"OK"}]}}`)
+	expected := []Entities{Entities{Id: 123, Name: "pool-test-1", Status: "OK"}}
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write(result)
+		w.Write(b)
 	}))
 	defer ts.Close()
 
@@ -65,20 +63,13 @@ func (s *S) TestTablePool(c *C) {
 	o := os.Stdout
 	r, w, _ := os.Pipe()
 	os.Stdout = w
-
 	renderTable(p)
-
-	out := make(chan string)
-	go func() {
-		var buf bytes.Buffer
-		io.Copy(&buf, r)
-		out <- buf.String()
-	}()
-
 	w.Close()
+	out, _ := ioutil.ReadAll(r)
 	os.Stdout = o
 
-	got := <-out
+	got := string(out)
+
 	expected := `+-----+-------------+--------+
 | ID  |    NAME     | STATUS |
 +-----+-------------+--------+
