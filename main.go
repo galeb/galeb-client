@@ -14,20 +14,36 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
-func parseJson(body []byte, path string) ([]*gabs.Container, error) {
+
+type Entities struct {
+	Id     int
+	Name   string
+	Status string
+}
+
+func parseJson(body []byte, path string) ([]Entities, error) {
 	jsonParsed, err := gabs.ParseJSON(body)
 	if err != nil {
 		return nil, errors.New("error while parsing body")
 	}
-	entities, err := jsonParsed.S("_embedded", path).Children()
+	embedded, err := jsonParsed.S("_embedded", path).Children()
 	if err != nil {
 		return nil, errors.New("error while getting entity")
+	}
+
+	var entities []Entities
+	for _, entity := range embedded {
+		data := entity.Data().(map[string]interface{})
+		entities = append(entities, Entities{
+			Id:     int(data["id"].(float64)),
+			Name:   data["name"].(string),
+			Status: data["_status"].(string)})
 	}
 
 	return entities, nil
 }
 
-func getEntity(url string, token string, path string) ([]*gabs.Container, error) {
+func getEntity(url string, token string, path string) ([]Entities, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	req.Header.Set("x-auth-token", token)
 	req.Header.Set("Content-Type", "application/json")
@@ -49,14 +65,14 @@ func getEntity(url string, token string, path string) ([]*gabs.Container, error)
 	return entities, err
 }
 
-func renderTable(entities []*gabs.Container) {
+func renderTable(entities []Entities) {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"ID", "Name", "Status"})
 	table.SetAlignment(tablewriter.ALIGN_CENTER)
 
 	for _, entity := range entities {
-		newData := entity.Data().(map[string]interface{})
-		table.Append([]string{strconv.FormatFloat(newData["id"].(float64), 'f', 0, 64), newData["name"].(string), newData["_status"].(string)})
+		table.Append([]string{strconv.Itoa(entity.Id), entity.Name, entity.Status})
+
 	}
 	table.Render()
 }
